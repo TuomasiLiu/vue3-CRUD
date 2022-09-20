@@ -1,5 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus'
+
 
 // 所有的数据
 // 搜索框
@@ -57,6 +59,7 @@ const tableData = ref([
     },
 ])
 
+// 浅拷贝table表格数据
 const copyTableData = Object.assign(tableData.value)
 
 // 表格选中的数据
@@ -77,8 +80,12 @@ const tableForm = ref({
 // 弹窗标题
 const dialogAdd = ref('add')
 
-// 所有的方法
+const dialogRef = ref(null)
 
+
+
+
+// 所有的方法
 // 选中
 const handleSelectionChange = (val) => {
     // multipleSelection.value = val;
@@ -109,6 +116,26 @@ const modifyData = (row) => {
 
 // 删除一条
 const deletedData = ({ id }) => {
+    // ElMessageBox.confirm(
+    //     `确定删除Id为 ${id} 的数据吗？`,
+    //     '提示',
+    //     {
+    //         confirmButtonText: '确定',
+    //         cancelButtonText: '取消',
+    //         type: 'warning',
+    //     }
+    // ).then(() => {
+    //     ElMessage({
+    //         type: 'success',
+    //         message: '删除成功！',
+    //     })
+    // }).catch(() => {
+    //     ElMessage({
+    //         type: 'info',
+    //         message: '删除失败！',
+    //     })
+    // })
+
     // console.log(row.id);
     // 通过 id 获取条目所对应的索引值
     const index = tableData.value.findIndex(item => item.id === id);
@@ -135,20 +162,44 @@ const queryData = (val) => {
 
 // 弹窗确定按钮
 const dialogConfim = () => {
-    dialogFormVisible.value = false;
-    if (dialogAdd.value === 'add') { //更新操作
-        // 1.拿到数据
-        // 2.添加到table中
-        tableData.value.push({
-            id: (tableData.value.length + 1).toString(),
-            ...tableForm.value
-        })
-        console.log(tableData.value);
-    } else { //修改操作
-        const index = tableData.value.findIndex(item => item.id === tableForm.value.id)
-        tableData.value[index] = tableForm.value
-    }
+    dialogRef.value.validate((valid) => {
+        if (valid) {
+            dialogFormVisible.value = false;
+            if (dialogAdd.value === 'add') { //更新操作
+                // 1.拿到数据
+                // 2.添加到table中
+                tableData.value.push({
+                    id: (tableData.value.length + 1).toString(),
+                    ...tableForm.value
+                })
+                ElMessage({
+                    message: '添加成功~',
+                    type: 'success',
+                })
+                console.log(tableData.value);
+            } else { //修改操作
+                const index = tableData.value.findIndex(item => item.id === tableForm.value.id)
+                tableData.value[index] = tableForm.value
+                ElMessage({
+                    message: '修改成功~',
+                    type: 'success',
+                })
+            }
+        } else {
+            console.log('error submit!!');
+            return false;
+        }
+    });
+
+
+
 }
+
+// 表单验证
+const rules = reactive({
+    name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+    age: [{ required: true, message: '请输入年龄', trigger: 'blur' }]
+})
 
 
 </script>
@@ -190,15 +241,15 @@ const dialogConfim = () => {
   </el-table>
 
   <el-dialog v-model="dialogFormVisible" :title="dialogAdd === 'add'? '新增':'修改'" width="650px">
-    <el-form :model="tableForm">
-      <el-form-item label="姓名" :label-width="60">
+    <el-form :model="tableForm" :rules="rules" ref="dialogRef">
+      <el-form-item label="姓名" prop="name" :label-width="60">
         <el-input v-model="tableForm.name" placeholder="请输入姓名" autocomplete="off"/>
       </el-form-item>
-      <el-form-item label="年龄" :label-width="60">
+      <el-form-item label="年龄" prop="age" :label-width="60">
         <el-input v-model="tableForm.age" placeholder="请输入年龄" autocomplete="off"/>
       </el-form-item>
       <el-form-item label="日期" :label-width="60">
-        <el-input v-model="tableForm.dataTime" placeholder="请输入日期" autocomplete="off"/>
+         <el-date-picker v-model="tableForm.dataTime" type="date" placeholder="请选择日期" value-format="YYYY-MM-DD"/>
       </el-form-item>
       <el-form-item label="状态" :label-width="60">
         <el-input v-model="tableForm.state" placeholder="请输入状态" autocomplete="off"/>
