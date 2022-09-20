@@ -76,7 +76,17 @@ const handleSelectionChange = (val) => {
 // 新增
 const addQuery = () => {
     dialogFormVisible.value = true;
-    tableForm.value = {}
+    tableForm.value = {};
+    dialogAdd.value = 'add';
+}
+
+// 修改
+const modifyData = (row) => {
+    console.log(row);
+    dialogFormVisible.value = true;
+    dialogAdd.value = 'edit';
+    tableForm.value = { ...row }
+
 }
 
 // 删除一条
@@ -97,15 +107,20 @@ const delQueryList = () => {
 }
 
 // 弹窗确定按钮
-const addConfim = () => {
+const dialogConfim = () => {
     dialogFormVisible.value = false;
-    // 1.拿到数据
-    // 2.添加到table中
-    tableData.value.push({
-        id: (tableData.value.length + 1).toString(),
-        ...tableForm.value
-    })
-    console.log(tableData.value);
+    if (dialogAdd.value === 'add') { //更新操作
+        // 1.拿到数据
+        // 2.添加到table中
+        tableData.value.push({
+            id: (tableData.value.length + 1).toString(),
+            ...tableForm.value
+        })
+        console.log(tableData.value);
+    } else { //修改操作
+        const index = tableData.value.findIndex(item => item.id === tableForm.value.id)
+        tableData.value[index] = tableForm.value
+    }
 }
 
 
@@ -142,12 +157,12 @@ const addConfim = () => {
                 <el-button link type="primary" size="small" style="color:#F56C6C ;" @click="deletedData(scope.row)">
                     删除
                 </el-button>
-                <el-button link type="primary" size="small">编辑</el-button>
+                <el-button link type="primary" size="small" @click="modifyData(scope.row)">编辑</el-button>
             </template>
         </el-table-column>
   </el-table>
 
-  <el-dialog v-model="dialogFormVisible" :title="dialogAdd === 'add'? '新增':'编辑'" width="650px">
+  <el-dialog v-model="dialogFormVisible" :title="dialogAdd === 'add'? '新增':'修改'" width="650px">
     <el-form :model="tableForm">
       <el-form-item label="姓名" :label-width="60">
         <el-input v-model="tableForm.name" placeholder="请输入姓名" autocomplete="off"/>
@@ -168,7 +183,7 @@ const addConfim = () => {
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="addConfim"
+        <el-button type="primary" @click="dialogConfim"
           >确定
         </el-button>
       </span>
