@@ -17,7 +17,7 @@ const tableData = ref([
     },
     {
         id: '2',
-        name: '张三2',
+        name: '李四',
         age: 18,
         dataTime: '2022-09-21',
         state: '在职',
@@ -25,7 +25,7 @@ const tableData = ref([
     },
     {
         id: '3',
-        name: '张三3',
+        name: '王五',
         age: 18,
         dataTime: '2022-09-22',
         state: '在职',
@@ -33,13 +33,31 @@ const tableData = ref([
     },
     {
         id: '4',
-        name: '张三4',
+        name: '赵七',
         age: 18,
         dataTime: '2022-09-23',
         state: '在职',
         address: '广东',
     },
+    {
+        id: '5',
+        name: '赵小七',
+        age: 18,
+        dataTime: '2022-09-23',
+        state: '在职',
+        address: '哈尔滨',
+    },
+    {
+        id: '6',
+        name: 'Tom',
+        age: 18,
+        dataTime: '2022-09-23',
+        state: '在职',
+        address: '南昌',
+    },
 ])
+
+const copyTableData = Object.assign(tableData.value)
 
 // 表格选中的数据
 const multipleSelection = ref([])
@@ -106,6 +124,15 @@ const delQueryList = () => {
     multipleSelection.value = []
 }
 
+// 搜索
+const queryData = (val) => {
+    if (val.length > 0) {
+        tableData.value = tableData.value.filter(item => (item.name).toLowerCase().match(val.toLowerCase()))
+    } else {
+        tableData.value = copyTableData
+    }
+}
+
 // 弹窗确定按钮
 const dialogConfim = () => {
     dialogFormVisible.value = false;
@@ -133,7 +160,7 @@ const dialogConfim = () => {
     
     <el-row>
         <el-col :span="12">
-            <el-input v-model="queryInput" placeholder="请输入姓名" />
+            <el-input v-model="queryInput" placeholder="请输入搜索姓名🔍" @input="queryData"/>
         </el-col>
         <el-col :span="12" class="addQuery">
             <el-button type="primary" @click="addQuery">新增</el-button>
